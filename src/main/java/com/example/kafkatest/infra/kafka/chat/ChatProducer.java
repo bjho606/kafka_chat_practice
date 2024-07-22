@@ -12,13 +12,19 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @AllArgsConstructor
 public class ChatProducer {
-    private static final String TOPIC = "chat-messages";
+    private static final String TOPIC = "chat-topic";
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
-//    private final ObjectMapper objectMapper;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final ObjectMapper objectMapper;
 
-    public void sendMessage(ChatMessage message) {
-//        kafkaTemplate.send("chat-topic", objectMapper.writeValueAsString(message));
-        kafkaTemplate.send(TOPIC, message);
+    public void sendMessage(ChatMessage chatMessage) {
+//        System.out.println(chatMessage);
+        try {
+            String stringMessage = objectMapper.writeValueAsString(chatMessage);
+//            System.out.println("string: " + stringMessage);
+            kafkaTemplate.send(TOPIC, stringMessage);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("메시지 직렬화 실패!", e);
+        }
     }
 }
